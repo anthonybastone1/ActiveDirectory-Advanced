@@ -5,8 +5,7 @@ In this project, I setup an Active Directory home lab that includes Splunk, Kali
 
 <h2>Key Objectives</h2>
 
--
--
+- Install and configure sysmon and splunk on the target-PC and Windows Server.
 - Install and configure Active Directory onto Windows Server, promote it to DC (domain controller), configure the target machine to join the domain.
 - Kali Linux, brute force attack, view telemetry via splunk, setup and install Atomic Red Team to run tests.
 
@@ -330,26 +329,90 @@ Assigning a static IP address of 192.168.10.250/24. Verified the change took pla
 <br />
 <br />
 <br />
-Installed updates and upgrades then created a new directory named ad-project. Installed the tool crowbar to use for the brute force attack. 
+Installed updates and upgrades then created a new directory named ad-project. Installed the tool crowbar to use for the brute force attack, and rockyou wordlist to aid in the attack. 
 <br />
 <br />
 <img src="https://imgur.com/GO9FcOj.png" height="80%" width="80%"/>
-
-
-
-
-
-
-
+<br />
+<br />
+<img src="https://imgur.com/YPqJ5Js.png" height="80%" width="80%"/>
+<br />
+<br />
+<br />
+<br />
+<br />
+Enabled RDP for both users that I created on the Windows machine (target-PC), then conducted the brute force attack in the Kali Linux VM by running the follwoing command:
+<br />
+<br />
+crowbar -b rdp -u jbrown -C passwords.txt -s 192.168.10.100/32
+<br />
+<br />
+Used /32 because I only wanted to target that specific IP address.
+<br />
+<br />
+<img src="https://imgur.com/Sojv0LM.png" height="80%" width="80%"/>
+<br />
+<br />
+<img src="https://imgur.com/tdZrPHg.png" height="80%" width="80%"/>
+<br />
+<br />
+<br />
+<br />
+<br />
+As you can see above, the brute force attack on the user James Brown was successful. So I logged into the splunk web server and queried the database for information related to the attack in the images below. You will notice the event ID 4625 with a count of 20. A quick google search tells us that the event ID 4625 is for failed attempts to log in to a local computer. When I expanded the section, all the attempts occurred at the same time, indicating a brute force attack.
+<br />
+<br />
+There is also an event ID 4624 with a count of 1. This is indicative of a successful attempt to login to a local computer. This also occurred at the same time as the 20 failed attempts, confirming that the successful attempt was part of the brute force attack. So we've seen it from the attacker's side in Kali Linux, and the defender's side in splunk.
+<br />
+<br />
+<img src="https://imgur.com/AUBXxSz.png" height="80%" width="80%"/>
+<br />
+<br />
+<img src="https://imgur.com/McbCFvX.png" height="80%" width="80%"/>
+<br />
+<br />
+<img src="https://imgur.com/ywmI6dT.png" height="80%" width="80%"/>
+<br />
+<br />
+<img src="https://imgur.com/7VmN0Ja.png" height="80%" width="80%"/>
+<br />
+<br />
+<br />
+<br />
+<br />
+Lastly, I set an exclusion for the C drive on the target-PC before installing Atomic Red Team (ART) since Windows Defender can detect and remove some of the files from ART. After doing so, I installed ART.
+<br />
+<br />
+<img src="https://imgur.com/P3CWwJP.png" height="80%" width="80%"/>
+<br />
+<br />
+<img src="https://imgur.com/K6QjNV2.png" height="80%" width="80%"/>
+<br />
+<br />
+<br />
+<br />
+<br />
+Generating telemetry based on creating a local account, NewLocalUser. Searched splunk for NewLocalUser to see if it was detected. Repeated the ART test with another Mitre Att&ck framework technique ID. Both events were detected and they can be used to build alerts based on these activities in the future.
+<br />
+<br />
+<img src="https://imgur.com/iBVk2nw.png" height="80%" width="80%"/>
+<br />
+<br />
+<img src="https://imgur.com/0lQIHCG.png" height="80%" width="80%"/>
+<br />
+<br />
+<img src="https://imgur.com/5JBIbEv.png" height="80%" width="80%"/>
+<br />
+<br />
+<img src="https://imgur.com/TiaJ8p0.png" height="80%" width="80%"/>
 
 </p>
+
 <br />
 <br />
+
 <h2>Conclusion</h2>
-In this project, I set up a home lab using Elastic SIEM and a Kali VM. I configured the system to forward data from the Kali VM to the SIEM using the Elastic Beats agent, generated security events on the Kali VM using Nmap, and queried and analyzed the logs in the SIEM using the Elastic web interface. 
-<br />
-<br />
-I also created a dashboard to visualize security events and then created an alert to detect security events. This home lab provided a valuable environment for learning and practicing the skills necessary for effective security monitoring and incident response using Elastic SIEM.
+In this project, I configured four virtual machines. A windows 10 VM, windows server, splunk server, and Kali Linux VM. During the project, I was able to acquire hands-on experience from a multitude of commands, environments, and simulated real-world attacks. I was also able to successfully install sysmon, splunk forwarder, splunk enterprise SIEM, and Atomic Red Team. I've found them to be valuable assets when it comes to cybersecurity as they can help one identity threaths and vulnerabilities within a network. This home lab has equipped me with valuable experience in red teaming and blue teaming. I look forward to continuing to learn and practice the skills necessary for effective security monitoring.
 
 <!--
  ```diff
